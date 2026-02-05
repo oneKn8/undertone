@@ -1,0 +1,31 @@
+"""Runner module for systemd service."""
+
+import logging
+import os
+import sys
+
+from speaksy.config import get_api_key, load_config
+from speaksy.core import SpeaksyEngine
+
+
+def main():
+    """Run the speaksy engine."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%H:%M:%S",
+    )
+
+    config = load_config()
+    api_key = get_api_key()
+
+    if not api_key:
+        logging.error("No API key configured. Run 'speaksy' to set up.")
+        sys.exit(1)
+
+    engine = SpeaksyEngine(config, api_key=api_key)
+    engine.run()
+
+
+if __name__ == "__main__":
+    main()
