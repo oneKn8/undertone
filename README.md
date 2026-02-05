@@ -1,107 +1,174 @@
-# speaksy
+<p align="center">
+  <img src="https://img.shields.io/badge/speaksy-voice%20typing-blueviolet?style=for-the-badge&logo=microphone" alt="speaksy">
+</p>
 
-**talk it. type it. ship it.**
+<h1 align="center">speaksy</h1>
 
-Voice typing for Linux that actually works. Hold a key, speak, release - your words appear wherever you're typing.
+<p align="center">
+  <strong>talk it. type it. ship it.</strong>
+</p>
 
-## Install
+<p align="center">
+  <a href="https://github.com/oneKn8/speaksy/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python"></a>
+  <a href="https://github.com/oneKn8/speaksy"><img src="https://img.shields.io/badge/platform-Linux-orange.svg" alt="Platform"></a>
+  <a href="https://console.groq.com"><img src="https://img.shields.io/badge/powered%20by-Groq-ff6600.svg" alt="Groq"></a>
+</p>
 
-```bash
-pipx install speaksy    # recommended
-# or
-pip3 install speaksy
+<p align="center">
+  <em>Voice typing for Linux that actually works.<br>Hold a key, speak, release — your words appear wherever you're typing.</em>
+</p>
+
+---
+
+## Demo
+
+```
+$ speaksy
+
+  ╭────────────────────────────────────────╮
+  │  SPEAKSY                               │
+  │  talk it. type it. ship it.            │
+  ╰────────────────────────────────────────╯
+
+  Status: vibing
+  Hotkeys: Right Ctrl (hold) | F8 (toggle)
+
+speaksy> _
 ```
 
-## Setup (30 seconds)
+<!-- TODO: Add demo GIF here -->
+<!-- ![Demo](assets/demo.gif) -->
+
+---
+
+## Quick Start
 
 ```bash
+# Install
+pipx install speaksy
+
+# Run (interactive setup on first launch)
 speaksy
 ```
 
-That's it. Follow the prompts to add your free Groq API key.
+That's it. 30 seconds to voice typing.
 
-## Usage
-
-| Action | Hotkey |
-|--------|--------|
-| Push-to-talk | Hold Right Ctrl |
-| Toggle mode | Press F8 |
-
-Works everywhere - browser, terminal, IDE, Slack, Discord, anywhere you type.
+---
 
 ## Features
 
-- **Fast** - Groq's Whisper API responds in <1 second
-- **Smart** - AI cleans up grammar and filler words automatically
-- **Free** - Groq's free tier is generous (no credit card needed)
-- **Offline fallback** - Works without internet using local Whisper
-- **Privacy mode** - Keep your voice 100% local if you prefer
-- **Auto-starts** - Runs on login, always ready when you are
+| | Feature | Description |
+|---|---------|-------------|
+| **Speed** | < 1 second latency | Groq's Whisper API is blazing fast |
+| **Smart** | AI text cleanup | Fixes grammar, removes "um", "uh", "like" |
+| **Free** | No credit card | Groq's free tier is generous |
+| **Offline** | Local fallback | Works without internet via faster-whisper |
+| **Private** | Privacy mode | Keep voice 100% on your machine |
+| **Auto** | Runs on login | Always ready when you are |
 
-## Requirements
+---
 
-- Linux (X11 or XWayland)
-- Python 3.10+
-- Free Groq API key ([get one here](https://console.groq.com))
+## How It Works
 
-## CLI Commands
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│  Hold Key   │ -> │   Speak     │ -> │  Release    │ -> │ Text Appears│
+│  (Right Ctrl)    │  naturally  │    │   key       │    │  at cursor  │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+                            |
+                            v
+                   ┌─────────────────┐
+                   │  Groq Whisper   │
+                   │  + LLM cleanup  │
+                   └─────────────────┘
+```
+
+1. Press hotkey (Right Ctrl = hold, F8 = toggle)
+2. Speak naturally
+3. Release — text appears in < 1 second
+
+Works everywhere: browser, terminal, IDE, Slack, Discord, anywhere you type.
+
+---
+
+## Commands
 
 Run `speaksy` to open the interactive CLI:
 
-| Command | What it does |
-|---------|--------------|
-| `/setup` | Configure API key, hotkeys, install service |
+| Command | Description |
+|---------|-------------|
+| `/setup` | Configure API key & hotkeys |
 | `/start` | Start voice typing |
-| `/stop` | Stop voice typing |
-| `/status` | Show current status |
-| `/logs` | View recent activity |
-| `/config` | Edit settings |
-| `/help` | Show all commands |
-| `/quit` | Exit (service keeps running) |
+| `/stop` | Take a break |
+| `/status` | Check the vibe |
+| `/logs` | View receipts |
+| `/config` | Tweak settings |
+| `/help` | Get backup |
+| `/quit` | Peace out |
 
-## How it works
+---
 
-1. You press the hotkey (Right Ctrl by default)
-2. Speak naturally
-3. Release the key
-4. Your speech is sent to Groq's Whisper API for transcription
-5. An LLM cleans up grammar and removes filler words
-6. The text is pasted at your cursor
+## Requirements
 
-The whole process takes less than 1 second.
+- **OS:** Linux (X11 or XWayland)
+- **Python:** 3.10+
+- **API Key:** Free from [console.groq.com](https://console.groq.com)
 
-## Privacy
+System dependencies (auto-installed during setup):
+```bash
+sudo apt install xclip xdotool
+```
 
-By default, your audio is sent to Groq for transcription. If you prefer to keep everything local:
+---
+
+## Privacy Mode
+
+By default, audio goes to Groq for fast transcription. Want to keep it local?
 
 ```
 speaksy> /config
-# Select "Privacy mode" and choose "local"
+# Select "Privacy mode" -> "local"
 ```
 
-Local mode uses [faster-whisper](https://github.com/SYSTRAN/faster-whisper) running on your CPU. It's slower (~3-5 seconds) but your voice never leaves your machine.
+Local mode uses [faster-whisper](https://github.com/SYSTRAN/faster-whisper) on your CPU. Slower (~3-5s) but your voice never leaves your machine.
+
+---
 
 ## Troubleshooting
 
-**No audio input detected**
-- Check your microphone is connected and working
+<details>
+<summary><strong>No audio input detected</strong></summary>
+
+- Check your mic is connected
 - Run `arecord -l` to list audio devices
+</details>
 
-**Text not appearing**
-- Make sure xclip and xdotool are installed: `sudo apt install xclip xdotool`
-- Some Wayland apps may not work with xdotool
+<details>
+<summary><strong>Text not appearing</strong></summary>
 
-**Service won't start**
-- Check logs: `speaksy` then `/logs`
-- Verify your API key is valid at console.groq.com
+- Install dependencies: `sudo apt install xclip xdotool`
+- Some pure Wayland apps may not work with xdotool
+</details>
+
+<details>
+<summary><strong>Service won't start</strong></summary>
+
+- Check logs: run `speaksy` then `/logs`
+- Verify API key at console.groq.com
+</details>
+
+---
 
 ## Uninstall
 
 ```bash
+# Stop service
 speaksy
-# Run /stop, then exit
+# > /stop
+# > /quit
 
-# Remove the package
+# Remove package
 pipx uninstall speaksy
 
 # Remove config (optional)
@@ -110,10 +177,34 @@ rm ~/.config/systemd/user/speaksy.service
 systemctl --user daemon-reload
 ```
 
-## License
+---
 
-MIT
+## Tech Stack
+
+- **STT:** [Groq Whisper API](https://groq.com) / [faster-whisper](https://github.com/SYSTRAN/faster-whisper)
+- **LLM:** Llama 3.1 8B (via Groq) for text cleanup
+- **Audio:** [sounddevice](https://python-sounddevice.readthedocs.io/)
+- **Hotkeys:** [pynput](https://pynput.readthedocs.io/)
+- **CLI:** [Rich](https://rich.readthedocs.io/)
+
+---
 
 ## Contributing
 
-Issues and PRs welcome at [github.com/oneKn8/speaksy](https://github.com/oneKn8/speaksy)
+PRs and issues welcome!
+
+<a href="https://github.com/oneKn8/speaksy/issues">Report Bug</a>
+·
+<a href="https://github.com/oneKn8/speaksy/issues">Request Feature</a>
+
+---
+
+## License
+
+MIT - do whatever you want with it.
+
+---
+
+<p align="center">
+  <sub>Built with caffeine and voice commands</sub>
+</p>
