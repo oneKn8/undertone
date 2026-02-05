@@ -41,9 +41,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/oneknight/speaksy"
-Repository = "https://github.com/oneknight/speaksy"
-Issues = "https://github.com/oneknight/speaksy/issues"
+Homepage = "https://github.com/oneKn8/speaksy"
+Repository = "https://github.com/oneKn8/speaksy"
+Issues = "https://github.com/oneKn8/speaksy/issues"
 
 [project.scripts]
 speaksy = "speaksy.cli:main"

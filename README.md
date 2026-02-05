@@ -116,4 +116,4 @@ MIT
 
 ## Contributing
 
-Issues and PRs welcome at [github.com/oneknight/speaksy](https://github.com/oneknight/speaksy)
+Issues and PRs welcome at [github.com/oneKn8/speaksy](https://github.com/oneKn8/speaksy)
