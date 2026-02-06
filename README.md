@@ -50,6 +50,9 @@ pipx install speaksy
 
 # Run (interactive setup on first launch)
 speaksy
+
+# Upgrade to latest version
+pipx upgrade speaksy
 ```
 
 That's it. 30 seconds to voice typing.
