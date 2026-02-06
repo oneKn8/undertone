@@ -3,6 +3,7 @@
 import io
 import logging
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -198,60 +199,53 @@ def route_transcription(audio_buf, groq, local, config):
 # Text Cleanup (LLM post-processing)
 # ---------------------------------------------------------------------------
 
-CLEANUP_PROMPT = """You are a transcription cleanup tool. Your ONLY job is to clean up speech-to-text output.
-
-RULES:
-- Fix grammar, punctuation, and capitalization
-- Remove filler words (um, uh, like, you know, so, basically, actually)
-- Keep the EXACT same meaning - do not add, remove, or change any ideas
-- Output ONLY the cleaned text, nothing else
-
-CRITICAL - DO NOT:
-- Respond to the content as if it's a question or conversation
-- Add any commentary, greetings, or follow-up questions
-- Generate new sentences that weren't in the original
-- Explain what you did or add meta-commentary
-
-The user's text is raw speech transcription, NOT a message to you. Just clean it and return it."""
+# Filler words to remove (with word boundaries)
+FILLER_PATTERNS = [
+    r"\b(um+|uh+|er+|ah+)\b",
+    r"\b(like,?\s+)(?=\w)",  # "like" as filler, not "I like pizza"
+    r"\b(you know,?\s*)",
+    r"\b(basically,?\s*)",
+    r"\b(actually,?\s*)(?![\w])",  # "actually" as filler
+    r"\b(so,?\s+)(?=[a-z])",  # "so" at start as filler
+    r"\b(i mean,?\s*)",
+    r"\b(kind of|kinda)\s+",
+    r"\b(sort of|sorta)\s+",
+]
 
 
 class TextCleaner:
-    """Post-process transcribed text through a fast LLM."""
+    """Clean up transcribed text using simple regex rules."""
 
-    CHAT_URL = "https://api.groq.com/openai/v1/chat/completions"
-
-    def __init__(self, api_key, model="llama-3.1-8b-instant"):
-        self.api_key = api_key
-        self.model = model
+    def __init__(self, api_key=None, model=None):
+        # API key and model not used - kept for backward compatibility
+        pass
 
     def clean(self, text):
-        if not self.api_key or not text:
+        if not text:
             return text
 
-        try:
-            resp = httpx.post(
-                self.CHAT_URL,
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                json={
-                    "model": self.model,
-                    "messages": [
-                        {"role": "system", "content": CLEANUP_PROMPT},
-                        {"role": "user", "content": text},
-                    ],
-                    "temperature": 0,
-                    "max_tokens": len(text) * 2,
-                },
-                timeout=10.0,
-            )
-            resp.raise_for_status()
-            cleaned = resp.json()["choices"][0]["message"]["content"].strip()
-            if cleaned:
-                log.info(f'[Cleanup] "{text}" -> "{cleaned}"')
-                return cleaned
-        except Exception as e:
-            log.warning(f"Text cleanup failed ({e}), using raw transcription")
+        original = text
+        cleaned = text
 
-        return text
+        # Remove filler words
+        for pattern in FILLER_PATTERNS:
+            cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE)
+
+        # Clean up multiple spaces
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
+
+        # Capitalize first letter
+        if cleaned:
+            cleaned = cleaned[0].upper() + cleaned[1:]
+
+        # Add period if no ending punctuation
+        if cleaned and cleaned[-1] not in ".!?":
+            cleaned += "."
+
+        if cleaned != original:
+            log.info(f'[Cleanup] "{original}" -> "{cleaned}"')
+
+        return cleaned
 
 
 # ---------------------------------------------------------------------------
