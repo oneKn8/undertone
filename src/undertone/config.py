@@ -1,7 +1,10 @@
 """Configuration management for Undertone."""
 
+from __future__ import annotations
+
 import os
 from pathlib import Path
+from typing import TypedDict
 
 import yaml
 
@@ -10,11 +13,66 @@ CONFIG_DIR = Path.home() / ".config" / "undertone"
 CONFIG_FILE = CONFIG_DIR / "config.yaml"
 ENV_FILE = CONFIG_DIR / ".env"
 
-DEFAULT_CONFIG = {
+
+# ---------------------------------------------------------------------------
+# TypedDict schemas for config structure
+# ---------------------------------------------------------------------------
+
+
+class STTConfig(TypedDict, total=False):
+    primary: str
+    groq_model: str
+    local_model: str
+    local_device: str
+    local_compute_type: str
+    language: str
+
+
+class CleanupConfig(TypedDict, total=False):
+    enabled: bool
+    llm_enabled: bool
+    model: str
+
+
+class AudioConfig(TypedDict, total=False):
+    sample_rate: int
+    channels: int
+    sound_feedback: bool
+    pre_buffer_seconds: float
+
+
+class HotkeyConfig(TypedDict, total=False):
+    push_to_talk: str
+    toggle: str
+
+
+class TextInjectionConfig(TypedDict, total=False):
+    method: str
+    restore_clipboard: bool
+
+
+class TrayConfig(TypedDict, total=False):
+    enabled: bool
+
+
+class UndertoneConfig(TypedDict, total=False):
+    stt: STTConfig
+    cleanup: CleanupConfig
+    audio: AudioConfig
+    hotkeys: HotkeyConfig
+    text_injection: TextInjectionConfig
+    tray: TrayConfig
+
+
+# ---------------------------------------------------------------------------
+# Defaults
+# ---------------------------------------------------------------------------
+
+DEFAULT_CONFIG: dict = {
     "stt": {
         "primary": "groq",
         "groq_model": "whisper-large-v3-turbo",
-        "local_model": "base",
+        "local_model": "distil-large-v3",
         "local_device": "cpu",
         "local_compute_type": "int8",
         "language": "en",
@@ -27,6 +85,7 @@ DEFAULT_CONFIG = {
     "audio": {
         "sample_rate": 16000,
         "channels": 1,
+        "sound_feedback": True,
         "pre_buffer_seconds": 0.5,
     },
     "hotkeys": {
@@ -43,6 +102,11 @@ DEFAULT_CONFIG = {
 }
 
 
+# ---------------------------------------------------------------------------
+# Config functions
+# ---------------------------------------------------------------------------
+
+
 def deep_merge(base: dict, override: dict) -> dict:
     """Recursively merge override into base dict."""
     result = base.copy()
@@ -54,7 +118,7 @@ def deep_merge(base: dict, override: dict) -> dict:
     return result
 
 
-def ensure_config_dir():
+def ensure_config_dir() -> None:
     """Create config directory if it doesn't exist."""
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -74,7 +138,7 @@ def load_config() -> dict:
     return config
 
 
-def save_config(config: dict):
+def save_config(config: dict) -> None:
     """Save config to YAML file."""
     ensure_config_dir()
     with open(CONFIG_FILE, "w") as f:
@@ -92,7 +156,7 @@ def get_api_key() -> str:
     return os.getenv("GROQ_API_KEY", "")
 
 
-def save_api_key(api_key: str):
+def save_api_key(api_key: str) -> None:
     """Save API key to .env file."""
     ensure_config_dir()
     with open(ENV_FILE, "w") as f:
@@ -111,7 +175,7 @@ def is_configured() -> bool:
     return config_exists() and api_key_exists()
 
 
-def get_hotkeys() -> tuple:
+def get_hotkeys() -> tuple[str, str]:
     """Get current hotkey settings."""
     config = load_config()
     hotkeys = config.get("hotkeys", {})
@@ -121,7 +185,7 @@ def get_hotkeys() -> tuple:
     )
 
 
-def set_hotkeys(push_to_talk: str, toggle: str):
+def set_hotkeys(push_to_talk: str, toggle: str) -> None:
     """Update hotkey settings."""
     config = load_config()
     config["hotkeys"]["push_to_talk"] = push_to_talk
@@ -136,7 +200,7 @@ def get_privacy_mode() -> str:
     return "local" if primary == "local" else "cloud"
 
 
-def set_privacy_mode(mode: str):
+def set_privacy_mode(mode: str) -> None:
     """Set privacy mode (cloud or local)."""
     config = load_config()
     config["stt"]["primary"] = "local" if mode == "local" else "groq"
@@ -149,7 +213,7 @@ def get_cleanup_enabled() -> bool:
     return config.get("cleanup", {}).get("enabled", True)
 
 
-def set_cleanup_enabled(enabled: bool):
+def set_cleanup_enabled(enabled: bool) -> None:
     """Enable or disable text cleanup."""
     config = load_config()
     if "cleanup" not in config:
@@ -164,7 +228,7 @@ def get_cleanup_llm_enabled() -> bool:
     return config.get("cleanup", {}).get("llm_enabled", True)
 
 
-def set_cleanup_llm_enabled(enabled: bool):
+def set_cleanup_llm_enabled(enabled: bool) -> None:
     """Enable or disable LLM-based text cleanup."""
     config = load_config()
     if "cleanup" not in config:

@@ -10,7 +10,7 @@ from rich.prompt import Confirm, Prompt
 
 from undertone import config
 from undertone import service
-from undertone.core import detect_session
+from undertone.injection import detect_session
 
 console = Console()
 

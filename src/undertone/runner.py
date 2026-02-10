@@ -4,7 +4,7 @@ import logging
 import sys
 
 from undertone.config import get_api_key, load_config
-from undertone.core import UndertoneEngine
+from undertone.engine import UndertoneEngine
 
 
 def main():

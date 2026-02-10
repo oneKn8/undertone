@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "undertone"
-version = "0.2.0"
+version = "0.3.0"
 description = "Voice typing for Linux. Talk it. Type it. Ship it."
 readme = "README.md"
 license = "MIT"
@@ -40,6 +40,15 @@ dependencies = [
     "rich>=13.0.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pytest-mock>=3.12",
+    "mypy>=1.8",
+    "ruff>=0.3",
+]
+
 [project.urls]
 Homepage = "https://github.com/oneKn8/undertone"
 Repository = "https://github.com/oneKn8/undertone"
@@ -50,3 +59,23 @@ undertone = "undertone.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/undertone"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 99
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
