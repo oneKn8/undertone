@@ -115,7 +115,12 @@ Run `undertone` to open the interactive CLI:
 - **Python:** 3.10+
 - **API Key:** Free from [console.groq.com](https://console.groq.com)
 
-System dependencies (auto-detected and installed during setup):
+System dependencies:
+
+**Audio (required):**
+```bash
+sudo apt install libportaudio2
+```
 
 **X11:**
 ```bash
