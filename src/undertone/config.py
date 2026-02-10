@@ -235,3 +235,48 @@ def set_cleanup_llm_enabled(enabled: bool) -> None:
         config["cleanup"] = {}
     config["cleanup"]["llm_enabled"] = enabled
     save_config(config)
+
+
+def get_sound_feedback() -> bool:
+    """Check if sound feedback is enabled."""
+    config = load_config()
+    return config.get("audio", {}).get("sound_feedback", True)
+
+
+def set_sound_feedback(enabled: bool) -> None:
+    """Enable or disable sound feedback."""
+    config = load_config()
+    if "audio" not in config:
+        config["audio"] = {}
+    config["audio"]["sound_feedback"] = enabled
+    save_config(config)
+
+
+def get_language() -> str:
+    """Get current STT language."""
+    config = load_config()
+    return config.get("stt", {}).get("language", "en")
+
+
+def set_language(language: str) -> None:
+    """Set STT language."""
+    config = load_config()
+    if "stt" not in config:
+        config["stt"] = {}
+    config["stt"]["language"] = language
+    save_config(config)
+
+
+def get_whisper_prompt() -> str:
+    """Get the Whisper prompt hint (helps with accents/vocabulary)."""
+    config = load_config()
+    return config.get("stt", {}).get("prompt", "")
+
+
+def set_whisper_prompt(prompt: str) -> None:
+    """Set the Whisper prompt hint."""
+    config = load_config()
+    if "stt" not in config:
+        config["stt"] = {}
+    config["stt"]["prompt"] = prompt
+    save_config(config)

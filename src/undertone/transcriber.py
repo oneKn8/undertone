@@ -29,10 +29,12 @@ class GroqTranscriber:
         api_key: str,
         model: str = "whisper-large-v3-turbo",
         language: Optional[str] = None,
+        prompt: Optional[str] = None,
     ) -> None:
         self.api_key = api_key
         self.model = model
         self.language = language
+        self.prompt = prompt
         self._client = httpx.Client(timeout=30.0)
 
     def transcribe(self, audio_buf: io.BytesIO) -> str:
@@ -48,6 +50,8 @@ class GroqTranscriber:
                 data: dict[str, str] = {"model": self.model}
                 if self.language:
                     data["language"] = self.language
+                if self.prompt:
+                    data["prompt"] = self.prompt
 
                 resp = self._client.post(
                     self.API_URL,

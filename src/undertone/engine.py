@@ -49,6 +49,7 @@ class UndertoneEngine:
             api_key=self.api_key,
             model=stt_cfg.get("groq_model", "whisper-large-v3-turbo"),
             language=stt_cfg.get("language"),
+            prompt=stt_cfg.get("prompt"),
         )
         self.local = LocalTranscriber(
             model_size=stt_cfg.get("local_model", "distil-large-v3"),

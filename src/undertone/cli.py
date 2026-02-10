@@ -152,10 +152,13 @@ def cmd_config():
     console.print("  3. Privacy mode (cloud/local)")
     console.print("  4. Text cleanup on/off")
     console.print("  5. LLM grammar fix on/off")
-    console.print("  6. Back")
+    console.print("  6. Sound feedback on/off")
+    console.print("  7. Language")
+    console.print("  8. Whisper prompt (accent/vocab hint)")
+    console.print("  9. Back")
     console.print()
 
-    choice = Prompt.ask("[cyan]pick one[/cyan]", choices=["1", "2", "3", "4", "5", "6"], default="6")
+    choice = Prompt.ask("[cyan]pick one[/cyan]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9"], default="9")
 
     if choice == "1":
         console.print()
@@ -228,6 +231,56 @@ def cmd_config():
 
         if service.is_running():
             service.restart_service()
+
+    elif choice == "6":
+        console.print()
+        current = config.get_sound_feedback()
+        console.print(f"[dim]currently: {'on' if current else 'off'}[/dim]")
+
+        new_state = Confirm.ask("[cyan]enable beep sounds?[/cyan]", default=current)
+        config.set_sound_feedback(new_state)
+        console.print(f"[green]sound feedback {'enabled' if new_state else 'disabled'}[/green]")
+
+        if service.is_running():
+            service.restart_service()
+            console.print("[dim]service restarted[/dim]")
+
+    elif choice == "7":
+        console.print()
+        current = config.get_language()
+        console.print(f"[dim]currently: {current}[/dim]")
+        console.print("[dim]examples: en, es, fr, de, ja, ko, zh, ar, hi, pt[/dim]")
+        console.print("[dim]tip: set to your native language for better accuracy[/dim]")
+        console.print()
+
+        new_lang = Prompt.ask("[cyan]language code[/cyan]", default=current)
+        config.set_language(new_lang)
+        console.print(f"[green]language set to '{new_lang}'[/green]")
+
+        if service.is_running():
+            service.restart_service()
+            console.print("[dim]service restarted[/dim]")
+
+    elif choice == "8":
+        console.print()
+        current = config.get_whisper_prompt()
+        console.print(f"[dim]currently: '{current or '(none)'}' [/dim]")
+        console.print("[dim]this hints Whisper about your accent, vocabulary, or topic.[/dim]")
+        console.print("[dim]example: 'Technical discussion about Python programming'[/dim]")
+        console.print("[dim]example: 'Speaker has an Indian English accent'[/dim]")
+        console.print("[dim]leave blank to clear.[/dim]")
+        console.print()
+
+        new_prompt = Prompt.ask("[cyan]whisper prompt[/cyan]", default=current)
+        config.set_whisper_prompt(new_prompt)
+        if new_prompt:
+            console.print(f"[green]whisper prompt set[/green]")
+        else:
+            console.print("[green]whisper prompt cleared[/green]")
+
+        if service.is_running():
+            service.restart_service()
+            console.print("[dim]service restarted[/dim]")
 
     console.print()
 
