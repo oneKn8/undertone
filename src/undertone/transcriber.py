@@ -7,7 +7,6 @@ import logging
 import os
 import tempfile
 import time
-from typing import Optional
 
 import httpx
 
@@ -28,8 +27,8 @@ class GroqTranscriber:
         self,
         api_key: str,
         model: str = "whisper-large-v3-turbo",
-        language: Optional[str] = None,
-        prompt: Optional[str] = None,
+        language: str | None = None,
+        prompt: str | None = None,
     ) -> None:
         self.api_key = api_key
         self.model = model
@@ -42,7 +41,7 @@ class GroqTranscriber:
         if not self.api_key:
             raise ValueError("No Groq API key configured")
 
-        last_exc: Optional[Exception] = None
+        last_exc: Exception | None = None
         for attempt in range(_MAX_RETRIES + 1):
             try:
                 audio_buf.seek(0)

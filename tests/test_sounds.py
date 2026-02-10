@@ -5,15 +5,14 @@ from __future__ import annotations
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-import pytest
 
 from undertone.sounds import (
-    SoundFeedback,
-    _generate_tone,
-    _generate_descending_tone,
+    _SAMPLE_RATE,
     _START_BEEP,
     _STOP_BEEP,
-    _SAMPLE_RATE,
+    SoundFeedback,
+    _generate_descending_tone,
+    _generate_tone,
 )
 
 

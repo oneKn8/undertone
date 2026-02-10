@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import threading
-from typing import Optional
 
 import numpy as np
 
@@ -65,7 +64,7 @@ class SoundFeedback:
 
     def __init__(self, enabled: bool = True) -> None:
         self.enabled = enabled
-        self._sd: Optional[object] = None
+        self._sd: object | None = None
         if enabled:
             try:
                 import sounddevice as sd

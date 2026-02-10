@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import os
 import signal
 import sys
 import threading
-from typing import Optional
 
 from undertone.audio import AudioRecorder
 from undertone.cleanup import TextCleaner
@@ -23,7 +23,7 @@ log = logging.getLogger("undertone")
 class UndertoneEngine:
     """Orchestrates recording, transcription, and text injection."""
 
-    def __init__(self, config: dict, api_key: Optional[str] = None) -> None:
+    def __init__(self, config: dict, api_key: str | None = None) -> None:
         self.config = config
         self.api_key = api_key or os.getenv("GROQ_API_KEY", "")
         self._recording = False
@@ -59,7 +59,7 @@ class UndertoneEngine:
 
         # Text cleaner
         cleanup_cfg = config.get("cleanup", {})
-        self.cleaner: Optional[TextCleaner] = None
+        self.cleaner: TextCleaner | None = None
         if cleanup_cfg.get("enabled", True):
             self.cleaner = TextCleaner(
                 api_key=self.api_key,
@@ -69,7 +69,7 @@ class UndertoneEngine:
 
         # Tray icon
         tray_cfg = config.get("tray", {})
-        self.tray: Optional[TrayManager] = None
+        self.tray: TrayManager | None = None
         if tray_cfg.get("enabled", True) and HAS_TRAY:
             self.tray = TrayManager(on_quit=self.shutdown)
 
@@ -105,14 +105,15 @@ class UndertoneEngine:
         self._transcribing = True
         if self.tray:
             self.tray.set_state("processing")
-        threading.Thread(
-            target=self._transcribe_and_type, args=(audio_buf,), daemon=True
-        ).start()
+        threading.Thread(target=self._transcribe_and_type, args=(audio_buf,), daemon=True).start()
 
     def _transcribe_and_type(self, audio_buf: object) -> None:
         try:
             text, source = route_transcription(
-                audio_buf, self.groq, self.local, self.config  # type: ignore[arg-type]
+                audio_buf,
+                self.groq,
+                self.local,
+                self.config,  # type: ignore[arg-type]
             )
             self._using_fallback = source == "local"
 
@@ -143,9 +144,7 @@ class UndertoneEngine:
         self.hotkeys.start()
 
         session = detect_session()
-        log.info(
-            f"Session: {session} | clipboard: {_CLIP_COPY[0]} | keys: {_KEY_TOOL}"
-        )
+        log.info(f"Session: {session} | clipboard: {_CLIP_COPY[0]} | keys: {_KEY_TOOL}")
 
         api_status = "configured" if self.api_key else "NOT SET (local only)"
         log.info(f"Undertone ready. API key: {api_status}")
@@ -158,10 +157,8 @@ class UndertoneEngine:
         if self.tray:
             self.tray.start()
         else:
-            try:
+            with contextlib.suppress(KeyboardInterrupt):
                 signal.pause()
-            except KeyboardInterrupt:
-                pass
 
     def shutdown(self) -> None:
         """Stop the engine and release resources."""

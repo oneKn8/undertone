@@ -2,17 +2,15 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
 from undertone.cleanup import (
-    CLEANUP_SYSTEM_PROMPT,
-    FILLER_PATTERNS,
-    TextCleaner,
     _CONVERSATIONAL_PREFIXES,
+    CLEANUP_SYSTEM_PROMPT,
+    TextCleaner,
 )
-
 
 # ---------------------------------------------------------------------------
 # Regex cleanup tests
@@ -113,11 +111,7 @@ class TestLLMClean:
         mock_resp = MagicMock()
         mock_resp.json.return_value = {
             "choices": [
-                {
-                    "message": {
-                        "content": "Sure, I'd be happy to help! The meaning of life is..."
-                    }
-                }
+                {"message": {"content": "Sure, I'd be happy to help! The meaning of life is..."}}
             ]
         }
         mock_resp.raise_for_status = MagicMock()
@@ -131,9 +125,7 @@ class TestLLMClean:
         cleaner = self._make_cleaner()
         mock_resp = MagicMock()
         # Response 3x longer than input — suspicious
-        mock_resp.json.return_value = {
-            "choices": [{"message": {"content": "A " * 100}}]
-        }
+        mock_resp.json.return_value = {"choices": [{"message": {"content": "A " * 100}}]}
         mock_resp.raise_for_status = MagicMock()
         cleaner._client = MagicMock()
         cleaner._client.post.return_value = mock_resp
@@ -153,9 +145,7 @@ class TestLLMClean:
         """Verify the LLM request wraps input in <transcript> tags."""
         cleaner = self._make_cleaner()
         mock_resp = MagicMock()
-        mock_resp.json.return_value = {
-            "choices": [{"message": {"content": "Hello."}}]
-        }
+        mock_resp.json.return_value = {"choices": [{"message": {"content": "Hello."}}]}
         mock_resp.raise_for_status = MagicMock()
         cleaner._client = MagicMock()
         cleaner._client.post.return_value = mock_resp
@@ -172,9 +162,7 @@ class TestLLMClean:
         """Verify temperature is set to 0.0."""
         cleaner = self._make_cleaner()
         mock_resp = MagicMock()
-        mock_resp.json.return_value = {
-            "choices": [{"message": {"content": "Hello."}}]
-        }
+        mock_resp.json.return_value = {"choices": [{"message": {"content": "Hello."}}]}
         mock_resp.raise_for_status = MagicMock()
         cleaner._client = MagicMock()
         cleaner._client.post.return_value = mock_resp
@@ -197,9 +185,7 @@ class TestAdversarialInputs:
     def _make_cleaner_with_response(self, response: str) -> TextCleaner:
         cleaner = TextCleaner(api_key="gsk_test", model="test", llm_enabled=True)
         mock_resp = MagicMock()
-        mock_resp.json.return_value = {
-            "choices": [{"message": {"content": response}}]
-        }
+        mock_resp.json.return_value = {"choices": [{"message": {"content": response}}]}
         mock_resp.raise_for_status = MagicMock()
         cleaner._client = MagicMock()
         cleaner._client.post.return_value = mock_resp
@@ -237,9 +223,7 @@ class TestAdversarialInputs:
         assert result is None
 
     def test_rejects_happy_to_prefix(self) -> None:
-        cleaner = self._make_cleaner_with_response(
-            "I'd be happy to help you with that!"
-        )
+        cleaner = self._make_cleaner_with_response("I'd be happy to help you with that!")
         result = cleaner._llm_clean("help me out")
         assert result is None
 

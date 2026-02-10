@@ -2,27 +2,16 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from unittest.mock import mock_open, patch, MagicMock
-
-import pytest
-import yaml
+from unittest.mock import MagicMock, mock_open, patch
 
 from undertone.config import (
     DEFAULT_CONFIG,
-    deep_merge,
-    load_config,
-    save_config,
-    get_api_key,
-    save_api_key,
     api_key_exists,
-    is_configured,
+    deep_merge,
+    get_api_key,
     get_hotkeys,
-    set_hotkeys,
     get_privacy_mode,
-    set_privacy_mode,
-    get_cleanup_enabled,
-    set_cleanup_enabled,
+    load_config,
 )
 
 
@@ -110,9 +99,7 @@ class TestGetApiKey:
     @patch("undertone.config.ENV_FILE")
     def test_reads_from_env_file(self, mock_file: MagicMock) -> None:
         mock_file.exists.return_value = True
-        with patch(
-            "builtins.open", mock_open(read_data="GROQ_API_KEY=gsk_test123\n")
-        ):
+        with patch("builtins.open", mock_open(read_data="GROQ_API_KEY=gsk_test123\n")):
             key = get_api_key()
         assert key == "gsk_test123"
 
@@ -137,9 +124,7 @@ class TestApiKeyExists:
 class TestHotkeyConfig:
     @patch("undertone.config.load_config")
     def test_get_hotkeys(self, mock_load: MagicMock) -> None:
-        mock_load.return_value = {
-            "hotkeys": {"push_to_talk": "Key.alt_l", "toggle": "Key.f9"}
-        }
+        mock_load.return_value = {"hotkeys": {"push_to_talk": "Key.alt_l", "toggle": "Key.f9"}}
         ptt, toggle = get_hotkeys()
         assert ptt == "Key.alt_l"
         assert toggle == "Key.f9"

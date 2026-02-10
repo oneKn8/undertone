@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import logging
-from typing import Callable, Optional, Union
+from collections.abc import Callable
 
 from pynput import keyboard
 
 log = logging.getLogger("undertone")
 
-KeyType = Union[keyboard.Key, keyboard.KeyCode]
+KeyType = keyboard.Key | keyboard.KeyCode
 
 
 def _parse_key(key_str: str) -> KeyType:
@@ -36,7 +36,7 @@ class HotkeyManager:
         self.on_stop = on_stop
         self._ptt_held = False
         self._toggle_active = False
-        self._listener: Optional[keyboard.Listener] = None
+        self._listener: keyboard.Listener | None = None
 
     def start(self) -> None:
         """Start the keyboard listener daemon."""
@@ -47,8 +47,7 @@ class HotkeyManager:
         self._listener.daemon = True
         self._listener.start()
         log.info(
-            f"Hotkeys active: hold {self.ptt_key} (push-to-talk), "
-            f"press {self.toggle_key} (toggle)"
+            f"Hotkeys active: hold {self.ptt_key} (push-to-talk), press {self.toggle_key} (toggle)"
         )
 
     def _on_press(self, key: KeyType) -> None:

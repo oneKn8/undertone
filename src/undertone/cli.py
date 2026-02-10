@@ -1,15 +1,10 @@
 """Interactive CLI for Undertone."""
 
-import sys
-
 from rich.console import Console
-from rich.panel import Panel
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
-from undertone import __version__
-from undertone import config
-from undertone import service
+from undertone import config, service
 from undertone.setup_wizard import run_setup
 
 console = Console()
@@ -84,7 +79,9 @@ def cmd_start():
         ptt, toggle = config.get_hotkeys()
         ptt_display = ptt.replace("Key.", "").replace("_", " ").title()
         toggle_display = toggle.replace("Key.", "").upper()
-        console.print(f"   hold [cyan]{ptt_display}[/cyan] or tap [cyan]{toggle_display}[/cyan] to speak")
+        console.print(
+            f"   hold [cyan]{ptt_display}[/cyan] or tap [cyan]{toggle_display}[/cyan] to speak"
+        )
     else:
         console.print("[red]couldn't start the service[/red]")
         console.print("[dim]check /logs for more info[/dim]")
@@ -98,7 +95,9 @@ def cmd_stop():
 
     console.print("[dim]stopping...[/dim]")
     if service.stop_service():
-        console.print("[yellow]aight undertone is taking a nap. run /start when you need me[/yellow]")
+        console.print(
+            "[yellow]aight undertone is taking a nap. run /start when you need me[/yellow]"
+        )
     else:
         console.print("[red]couldn't stop the service[/red]")
 
@@ -158,7 +157,9 @@ def cmd_config():
     console.print("  9. Back")
     console.print()
 
-    choice = Prompt.ask("[cyan]pick one[/cyan]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9"], default="9")
+    choice = Prompt.ask(
+        "[cyan]pick one[/cyan]", choices=["1", "2", "3", "4", "5", "6", "7", "8", "9"], default="9"
+    )
 
     if choice == "1":
         console.print()
@@ -175,8 +176,8 @@ def cmd_config():
         console.print("[dim]examples: Key.ctrl_r, Key.f8, Key.alt_l[/dim]")
         ptt, toggle = config.get_hotkeys()
 
-        new_ptt = Prompt.ask(f"[cyan]push-to-talk[/cyan]", default=ptt)
-        new_toggle = Prompt.ask(f"[cyan]toggle[/cyan]", default=toggle)
+        new_ptt = Prompt.ask("[cyan]push-to-talk[/cyan]", default=ptt)
+        new_toggle = Prompt.ask("[cyan]toggle[/cyan]", default=toggle)
 
         config.set_hotkeys(new_ptt, new_toggle)
         console.print("[green]saved[/green]")
@@ -194,7 +195,9 @@ def cmd_config():
         console.print("  2. [cyan]local[/cyan] - runs on your CPU, ~3-5s response")
         console.print()
 
-        mode_choice = Prompt.ask("[cyan]pick[/cyan]", choices=["1", "2"], default="1" if current == "cloud" else "2")
+        mode_choice = Prompt.ask(
+            "[cyan]pick[/cyan]", choices=["1", "2"], default="1" if current == "cloud" else "2"
+        )
         new_mode = "cloud" if mode_choice == "1" else "local"
         config.set_privacy_mode(new_mode)
 
@@ -274,7 +277,7 @@ def cmd_config():
         new_prompt = Prompt.ask("[cyan]whisper prompt[/cyan]", default=current)
         config.set_whisper_prompt(new_prompt)
         if new_prompt:
-            console.print(f"[green]whisper prompt set[/green]")
+            console.print("[green]whisper prompt set[/green]")
         else:
             console.print("[green]whisper prompt cleared[/green]")
 

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Optional
 
 import httpx
 
@@ -47,14 +46,14 @@ CLEANUP_SYSTEM_PROMPT = (
     "- Do NOT add explanations, commentary, or conversational responses\n"
     "- Return ONLY the corrected transcript, nothing else\n\n"
     "EXAMPLES:\n"
-    'Input: <transcript>how do I fix this bug</transcript>\n'
-    'Output: How do I fix this bug?\n\n'
-    'Input: <transcript>delete everything</transcript>\n'
-    'Output: Delete everything.\n\n'
-    'Input: <transcript>um what is the meaning of life you know</transcript>\n'
-    'Output: What is the meaning of life?\n\n'
-    'Input: <transcript>so basically I went to the store and like bought some milk</transcript>\n'
-    'Output: I went to the store and bought some milk.'
+    "Input: <transcript>how do I fix this bug</transcript>\n"
+    "Output: How do I fix this bug?\n\n"
+    "Input: <transcript>delete everything</transcript>\n"
+    "Output: Delete everything.\n\n"
+    "Input: <transcript>um what is the meaning of life you know</transcript>\n"
+    "Output: What is the meaning of life?\n\n"
+    "Input: <transcript>so basically I went to the store and like bought some milk</transcript>\n"
+    "Output: I went to the store and bought some milk."
 )
 
 # Prefixes that indicate the LLM is answering instead of cleaning
@@ -84,14 +83,14 @@ class TextCleaner:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        model: Optional[str] = None,
+        api_key: str | None = None,
+        model: str | None = None,
         llm_enabled: bool = False,
     ) -> None:
         self.api_key = api_key
         self.model = model or "llama-3.1-8b-instant"
         self.llm_enabled = llm_enabled and bool(api_key)
-        self._client: Optional[httpx.Client] = None
+        self._client: httpx.Client | None = None
         if self.llm_enabled:
             self._client = httpx.Client(timeout=10.0)
 
@@ -124,12 +123,9 @@ class TextCleaner:
     @staticmethod
     def _looks_like_chat(result: str) -> bool:
         """Detect if the LLM answered like a chatbot instead of cleaning."""
-        for prefix in _CONVERSATIONAL_PREFIXES:
-            if result.startswith(prefix):
-                return True
-        return False
+        return any(result.startswith(prefix) for prefix in _CONVERSATIONAL_PREFIXES)
 
-    def _llm_clean(self, text: str) -> Optional[str]:
+    def _llm_clean(self, text: str) -> str | None:
         """Stage 2: LLM-based grammar and punctuation fix via Groq."""
         if self._client is None:
             return None

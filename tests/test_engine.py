@@ -2,22 +2,24 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 
 class TestUndertoneEngine:
     def _make_engine(self, config: dict) -> object:
-        with patch("undertone.engine.AudioRecorder") as MockRecorder, \
-             patch("undertone.engine.GroqTranscriber") as MockGroq, \
-             patch("undertone.engine.LocalTranscriber") as MockLocal, \
-             patch("undertone.engine.TextCleaner") as MockCleaner, \
-             patch("undertone.engine.HotkeyManager") as MockHotkeys, \
-             patch("undertone.engine.SoundFeedback") as MockSounds, \
-             patch("undertone.engine.HAS_TRAY", False):
-
+        with (
+            patch("undertone.engine.AudioRecorder"),
+            patch("undertone.engine.GroqTranscriber"),
+            patch("undertone.engine.LocalTranscriber"),
+            patch("undertone.engine.TextCleaner"),
+            patch("undertone.engine.HotkeyManager"),
+            patch("undertone.engine.SoundFeedback"),
+            patch("undertone.engine.HAS_TRAY", False),
+        ):
             from undertone.engine import UndertoneEngine
+
             engine = UndertoneEngine(config, api_key="gsk_test")
             return engine
 
@@ -34,17 +36,13 @@ class TestUndertoneEngine:
         engine.recorder.start_recording.assert_called_once()
         engine.sounds.play_start.assert_called_once()
 
-    def test_on_record_start_ignores_if_already_recording(
-        self, mock_config: dict
-    ) -> None:
+    def test_on_record_start_ignores_if_already_recording(self, mock_config: dict) -> None:
         engine = self._make_engine(mock_config)
         engine._recording = True
         engine._on_record_start()
         engine.recorder.start_recording.assert_not_called()
 
-    def test_on_record_start_ignores_if_transcribing(
-        self, mock_config: dict
-    ) -> None:
+    def test_on_record_start_ignores_if_transcribing(self, mock_config: dict) -> None:
         engine = self._make_engine(mock_config)
         engine._transcribing = True
         engine._on_record_start()
@@ -61,9 +59,7 @@ class TestUndertoneEngine:
         assert engine._recording is False
         engine.sounds.play_stop.assert_called_once()
 
-    def test_on_record_stop_ignores_if_not_recording(
-        self, mock_config: dict
-    ) -> None:
+    def test_on_record_stop_ignores_if_not_recording(self, mock_config: dict) -> None:
         engine = self._make_engine(mock_config)
         engine._recording = False
         engine._on_record_stop()

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import io
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
@@ -12,9 +12,7 @@ from undertone.transcriber import (
     GroqTranscriber,
     LocalTranscriber,
     route_transcription,
-    _RETRYABLE_STATUSES,
 )
-
 
 # ---------------------------------------------------------------------------
 # GroqTranscriber
@@ -70,9 +68,7 @@ class TestGroqTranscriber:
 
 class TestRetryBehavior:
     @pytest.mark.parametrize("status_code", [429, 500, 502, 503])
-    def test_retries_on_retryable_status(
-        self, wav_buffer: io.BytesIO, status_code: int
-    ) -> None:
+    def test_retries_on_retryable_status(self, wav_buffer: io.BytesIO, status_code: int) -> None:
         transcriber = GroqTranscriber(api_key="gsk_test")
 
         # First call returns retryable status, second succeeds
@@ -141,9 +137,8 @@ class TestRetryBehavior:
         transcriber._client = MagicMock()
         transcriber._client.post.return_value = fail_resp
 
-        with patch("undertone.transcriber.time.sleep"):
-            with pytest.raises(httpx.HTTPStatusError):
-                transcriber.transcribe(wav_buffer)
+        with patch("undertone.transcriber.time.sleep"), pytest.raises(httpx.HTTPStatusError):
+            transcriber.transcribe(wav_buffer)
 
         assert transcriber._client.post.call_count == 3  # 1 + 2 retries
 
@@ -156,12 +151,11 @@ class TestRetryBehavior:
 class TestLocalTranscriber:
     def test_preload(self) -> None:
         transcriber = LocalTranscriber(model_size="tiny")
-        with patch("undertone.transcriber.WhisperModel", create=True) as mock_cls:
-            # Patch the import inside the method
-            with patch.dict(
-                "sys.modules", {"faster_whisper": MagicMock(WhisperModel=mock_cls)}
-            ):
-                transcriber.preload()
+        with (
+            patch("undertone.transcriber.WhisperModel", create=True) as mock_cls,
+            patch.dict("sys.modules", {"faster_whisper": MagicMock(WhisperModel=mock_cls)}),
+        ):
+            transcriber.preload()
         assert transcriber._model is not None
 
     def test_preload_only_once(self) -> None:

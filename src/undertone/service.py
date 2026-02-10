@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-from undertone.config import CONFIG_DIR, ENV_FILE
+from undertone.config import ENV_FILE
 
 SYSTEMD_USER_DIR = Path.home() / ".config" / "systemd" / "user"
 SERVICE_FILE = SYSTEMD_USER_DIR / "undertone.service"
@@ -147,7 +147,10 @@ def get_uptime() -> str:
     try:
         result = subprocess.run(
             [
-                "systemctl", "--user", "show", "undertone.service",
+                "systemctl",
+                "--user",
+                "show",
+                "undertone.service",
                 "--property=ActiveEnterTimestamp",
             ],
             capture_output=True,
@@ -160,6 +163,7 @@ def get_uptime() -> str:
                 if timestamp_str:
                     try:
                         from dateutil import parser
+
                         start_time = parser.parse(timestamp_str)
                         delta = datetime.now(start_time.tzinfo) - start_time
                         hours, remainder = divmod(int(delta.total_seconds()), 3600)
@@ -179,8 +183,13 @@ def get_logs(lines: int = 20) -> str:
     try:
         result = subprocess.run(
             [
-                "journalctl", "--user", "-u", "undertone.service",
-                "-n", str(lines), "--no-pager",
+                "journalctl",
+                "--user",
+                "-u",
+                "undertone.service",
+                "-n",
+                str(lines),
+                "--no-pager",
             ],
             capture_output=True,
             text=True,

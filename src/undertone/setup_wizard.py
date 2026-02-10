@@ -5,11 +5,9 @@ import subprocess
 
 import httpx
 from rich.console import Console
-from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 
-from undertone import config
-from undertone import service
+from undertone import config, service
 from undertone.injection import detect_session
 
 console = Console()
@@ -37,6 +35,7 @@ def check_system_deps() -> dict:
     # Check audio
     try:
         import sounddevice as sd
+
         devices = sd.query_devices()
         deps["audio"] = any(d.get("max_input_channels", 0) > 0 for d in devices)
     except Exception:
@@ -168,7 +167,7 @@ def run_setup():
             console.print("[green]we're in[/green]")
             break
         else:
-            console.print(f"[red]nah that ain't it[/red]")
+            console.print("[red]nah that ain't it[/red]")
             if error == "invalid_api_key":
                 console.print("   [dim]double check your key and try again[/dim]")
             else:

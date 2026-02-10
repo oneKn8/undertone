@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import os
-from unittest.mock import MagicMock, patch, call
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 
 class TestDetectSession:
@@ -73,9 +71,7 @@ class TestInjectText:
 
     @patch("undertone.injection._simulate_paste")
     @patch("undertone.injection.subprocess")
-    def test_inject_empty_text(
-        self, mock_subprocess: MagicMock, mock_paste: MagicMock
-    ) -> None:
+    def test_inject_empty_text(self, mock_subprocess: MagicMock, mock_paste: MagicMock) -> None:
         from undertone.injection import inject_text
 
         inject_text("", restore_clipboard=False)

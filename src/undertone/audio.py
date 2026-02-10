@@ -7,7 +7,6 @@ import logging
 import threading
 import wave
 from collections import deque
-from typing import Optional
 
 import numpy as np
 import sounddevice as sd
@@ -31,7 +30,7 @@ class AudioRecorder:
         self.pre_buffer: deque[np.ndarray] = deque(maxlen=max(pre_buffer_chunks, 1))
         self.recording_chunks: list[np.ndarray] = []
         self.is_recording = False
-        self.stream: Optional[sd.InputStream] = None
+        self.stream: sd.InputStream | None = None
         self._lock = threading.Lock()
 
     def open(self) -> None:
@@ -67,7 +66,7 @@ class AudioRecorder:
             self.is_recording = True
         log.info("Recording started")
 
-    def stop_recording(self) -> Optional[io.BytesIO]:
+    def stop_recording(self) -> io.BytesIO | None:
         """Stop capturing and return audio as an in-memory WAV BytesIO."""
         with self._lock:
             self.is_recording = False

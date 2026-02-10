@@ -61,9 +61,7 @@ def _simulate_paste() -> None:
         subprocess.run(["wtype", "-M", "ctrl", "v", "-m", "ctrl"], timeout=2)
     elif _KEY_TOOL == "ydotool":
         # Raw keycodes: 29=KEY_LEFTCTRL, 47=KEY_V
-        subprocess.run(
-            ["ydotool", "key", "29:1", "47:1", "47:0", "29:0"], timeout=2
-        )
+        subprocess.run(["ydotool", "key", "29:1", "47:1", "47:0", "29:0"], timeout=2)
     else:
         subprocess.run(["xdotool", "key", "ctrl+v"], timeout=2)
 

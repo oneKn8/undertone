@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from PIL import Image, ImageDraw
 
@@ -32,9 +32,7 @@ TRAY_TITLES: dict[str, str] = {
 }
 
 
-def _make_circle_icon(
-    color: tuple[int, int, int, int], size: int = 64
-) -> Image.Image:
+def _make_circle_icon(color: tuple[int, int, int, int], size: int = 64) -> Image.Image:
     """Create a solid circle icon for the system tray."""
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
@@ -47,7 +45,7 @@ class TrayManager:
 
     def __init__(self, on_quit: Callable[[], None]) -> None:
         self.on_quit = on_quit
-        self._icon: Optional[object] = None
+        self._icon: object | None = None
 
     def start(self) -> None:
         """Start the system tray icon (blocking)."""
@@ -69,9 +67,7 @@ class TrayManager:
     def set_state(self, state: str) -> None:
         """Update the tray icon color and title."""
         if self._icon:
-            self._icon.icon = _make_circle_icon(
-                TRAY_COLORS.get(state, TRAY_COLORS["ready"])
-            )
+            self._icon.icon = _make_circle_icon(TRAY_COLORS.get(state, TRAY_COLORS["ready"]))
             self._icon.title = TRAY_TITLES.get(state, "Undertone")
 
     def _quit(self) -> None:
