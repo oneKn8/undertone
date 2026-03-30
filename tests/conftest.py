@@ -40,6 +40,26 @@ def mock_config() -> dict:
         "text_injection": {
             "method": "clipboard",
             "restore_clipboard": True,
+            "paste_shortcut": "auto",
+        },
+        "formatting": {
+            "style": "auto",
+            "app_styles": {
+                "terminal": "literal",
+                "code_editor": "minimal",
+                "chat": "casual",
+                "email": "polished",
+                "docs": "polished",
+                "browser": "balanced",
+                "generic": "balanced",
+            },
+        },
+        "dictionary": {
+            "replacements": {},
+        },
+        "snippets": {
+            "enabled": True,
+            "items": {},
         },
         "tray": {
             "enabled": False,

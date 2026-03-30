@@ -9,8 +9,13 @@ from undertone.config import (
     api_key_exists,
     deep_merge,
     get_api_key,
+    get_dictation_style,
+    get_dictionary_replacements,
     get_hotkeys,
+    get_paste_shortcut,
     get_privacy_mode,
+    get_snippets,
+    get_snippets_enabled,
     load_config,
 )
 
@@ -77,6 +82,18 @@ class TestDefaultConfig:
     def test_has_tray_section(self) -> None:
         assert "tray" in DEFAULT_CONFIG
 
+    def test_has_paste_shortcut_default(self) -> None:
+        assert DEFAULT_CONFIG["text_injection"]["paste_shortcut"] == "auto"
+
+    def test_has_dictation_style_default(self) -> None:
+        assert DEFAULT_CONFIG["formatting"]["style"] == "auto"
+
+    def test_has_dictionary_section(self) -> None:
+        assert "dictionary" in DEFAULT_CONFIG
+
+    def test_has_snippets_section(self) -> None:
+        assert "snippets" in DEFAULT_CONFIG
+
 
 class TestLoadConfig:
     @patch("undertone.config.CONFIG_FILE")
@@ -140,3 +157,36 @@ class TestPrivacyMode:
     def test_local_mode(self, mock_load: MagicMock) -> None:
         mock_load.return_value = {"stt": {"primary": "local"}}
         assert get_privacy_mode() == "local"
+
+
+class TestPasteShortcut:
+    @patch("undertone.config.load_config")
+    def test_get_paste_shortcut(self, mock_load: MagicMock) -> None:
+        mock_load.return_value = {"text_injection": {"paste_shortcut": "ctrl_shift_v"}}
+        assert get_paste_shortcut() == "ctrl_shift_v"
+
+
+class TestDictationStyle:
+    @patch("undertone.config.load_config")
+    def test_get_dictation_style(self, mock_load: MagicMock) -> None:
+        mock_load.return_value = {"formatting": {"style": "casual"}}
+        assert get_dictation_style() == "casual"
+
+
+class TestDictionaryConfig:
+    @patch("undertone.config.load_config")
+    def test_get_dictionary_replacements(self, mock_load: MagicMock) -> None:
+        mock_load.return_value = {"dictionary": {"replacements": {"grok": "Groq"}}}
+        assert get_dictionary_replacements() == {"grok": "Groq"}
+
+
+class TestSnippetsConfig:
+    @patch("undertone.config.load_config")
+    def test_get_snippets_enabled(self, mock_load: MagicMock) -> None:
+        mock_load.return_value = {"snippets": {"enabled": False}}
+        assert get_snippets_enabled() is False
+
+    @patch("undertone.config.load_config")
+    def test_get_snippets(self, mock_load: MagicMock) -> None:
+        mock_load.return_value = {"snippets": {"items": {"my email": "me@example.com"}}}
+        assert get_snippets() == {"my email": "me@example.com"}

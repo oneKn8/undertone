@@ -13,7 +13,19 @@ import threading
 from undertone.audio import AudioRecorder
 from undertone.cleanup import TextCleaner
 from undertone.hotkeys import HotkeyManager
-from undertone.injection import _CLIP_COPY, _KEY_TOOL, detect_session, inject_text
+from undertone.injection import (
+    _CLIP_COPY,
+    _KEY_TOOL,
+    detect_session,
+    get_focused_app_context,
+    inject_text,
+)
+from undertone.learning import save_last_dictation
+from undertone.personalization import (
+    apply_dictionary_replacements,
+    expand_snippet,
+    resolve_style,
+)
 from undertone.sounds import SoundFeedback
 from undertone.transcriber import GroqTranscriber, LocalTranscriber, route_transcription
 from undertone.tray import HAS_TRAY, TrayManager
@@ -119,13 +131,46 @@ class UndertoneEngine:
             self._using_fallback = source == "local"
 
             if text:
-                if self.cleaner:
-                    text = self.cleaner.clean(text)
+                raw_text = text
+                app_context = get_focused_app_context()
+                formatting_cfg = self.config.get("formatting", {})
+                resolved_style = resolve_style(
+                    str(formatting_cfg.get("style", "auto")),
+                    formatting_cfg.get("app_styles"),
+                    app_context.get("category", "generic"),
+                )
+
+                snippet_cfg = self.config.get("snippets", {})
+                dictionary_cfg = self.config.get("dictionary", {})
+                snippet_text = None
+                if snippet_cfg.get("enabled", True):
+                    snippet_text = expand_snippet(text, snippet_cfg.get("items"))
+
+                if snippet_text is not None:
+                    log.info(f'[Snippet] "{text}" -> "{snippet_text}"')
+                    text = snippet_text
+                elif self.cleaner:
+                    text = self.cleaner.clean(
+                        text,
+                        style=resolved_style,
+                        app_context=app_context.get("category", "generic"),
+                    )
+
+                cleaned_text = text
+                text = apply_dictionary_replacements(text, dictionary_cfg.get("replacements"))
+                save_last_dictation(
+                    raw_text=raw_text,
+                    final_text=text,
+                    cleaned_text=cleaned_text,
+                    app_category=app_context.get("category", "generic"),
+                    style=resolved_style,
+                )
 
                 text_cfg = self.config.get("text_injection", {})
                 inject_text(
                     text,
                     restore_clipboard=text_cfg.get("restore_clipboard", True),
+                    paste_shortcut=text_cfg.get("paste_shortcut", "auto"),
                 )
         except Exception as e:
             log.error(f"Transcription failed: {e}")

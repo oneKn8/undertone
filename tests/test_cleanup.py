@@ -20,9 +20,8 @@ from undertone.cleanup import (
 class TestRegexClean:
     def test_removes_filler_words(self) -> None:
         cleaner = TextCleaner()
-        result = cleaner._regex_clean("um so like I went to the store")
+        result = cleaner._regex_clean("um I went to the store")
         assert "um" not in result.lower()
-        assert "like" not in result.lower()
         assert "store" in result.lower()
 
     def test_capitalizes_first_letter(self) -> None:
@@ -55,20 +54,25 @@ class TestRegexClean:
         result = cleaner._regex_clean("")
         assert result == ""
 
-    def test_removes_you_know(self) -> None:
+    def test_preserves_discourse_markers(self) -> None:
         cleaner = TextCleaner()
         result = cleaner._regex_clean("it was you know pretty good")
-        assert "you know" not in result.lower()
+        assert "you know" in result.lower()
 
-    def test_removes_basically(self) -> None:
+    def test_preserves_casual_words(self) -> None:
         cleaner = TextCleaner()
-        result = cleaner._regex_clean("basically it works fine")
-        assert "basically" not in result.lower()
+        result = cleaner._regex_clean("yo it's working right now")
+        assert result == "Yo it's working right now."
 
-    def test_removes_i_mean(self) -> None:
+    def test_preserves_i_mean(self) -> None:
         cleaner = TextCleaner()
         result = cleaner._regex_clean("i mean it should be fine")
-        assert "i mean" not in result.lower()
+        assert "i mean" in result.lower()
+
+    def test_literal_style_skips_added_period(self) -> None:
+        cleaner = TextCleaner()
+        result = cleaner._regex_clean("yo its working right now", style="literal")
+        assert result == "yo its working right now"
 
 
 # ---------------------------------------------------------------------------
@@ -141,6 +145,32 @@ class TestLLMClean:
         result = cleaner._llm_clean("test input")
         assert result is None
 
+    def test_llm_clean_rejects_dropped_style_marker(self) -> None:
+        cleaner = self._make_cleaner()
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = {
+            "choices": [{"message": {"content": "It's working right now."}}]
+        }
+        mock_resp.raise_for_status = MagicMock()
+        cleaner._client = MagicMock()
+        cleaner._client.post.return_value = mock_resp
+
+        result = cleaner._llm_clean("yo it's working right now")
+        assert result is None
+
+    def test_llm_clean_preserves_style_marker(self) -> None:
+        cleaner = self._make_cleaner()
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = {
+            "choices": [{"message": {"content": "Yo, it's working right now."}}]
+        }
+        mock_resp.raise_for_status = MagicMock()
+        cleaner._client = MagicMock()
+        cleaner._client.post.return_value = mock_resp
+
+        result = cleaner._llm_clean("yo it's working right now")
+        assert result == "Yo, it's working right now."
+
     def test_llm_uses_transcript_tags(self) -> None:
         """Verify the LLM request wraps input in <transcript> tags."""
         cleaner = self._make_cleaner()
@@ -172,6 +202,20 @@ class TestLLMClean:
         call_args = cleaner._client.post.call_args
         temp = call_args.kwargs.get("json", {}).get("temperature")
         assert temp == 0.0
+
+    def test_llm_uses_style_specific_prompt(self) -> None:
+        cleaner = self._make_cleaner()
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = {"choices": [{"message": {"content": "Yo."}}]}
+        mock_resp.raise_for_status = MagicMock()
+        cleaner._client = MagicMock()
+        cleaner._client.post.return_value = mock_resp
+
+        cleaner._llm_clean("yo", style="casual", app_context="chat")
+
+        system_prompt = cleaner._client.post.call_args.kwargs["json"]["messages"][0]["content"]
+        assert "Current app category: chat." in system_prompt
+        assert "casual" in system_prompt.lower()
 
 
 # ---------------------------------------------------------------------------
@@ -288,3 +332,6 @@ class TestSystemPrompt:
 
     def test_prompt_instructs_no_answers(self) -> None:
         assert "do not answer questions" in CLEANUP_SYSTEM_PROMPT.lower()
+
+    def test_prompt_preserves_speaker_voice(self) -> None:
+        assert "preserve the speaker's wording" in CLEANUP_SYSTEM_PROMPT.lower()

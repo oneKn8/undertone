@@ -61,7 +61,8 @@ That's it. 30 seconds to voice typing.
 | | Feature | Description |
 |---|---------|-------------|
 | **Speed** | < 1 second latency | Groq's Whisper API is blazing fast |
-| **Smart** | Grammar + filler fix | LLM fixes grammar, punctuation, removes filler words |
+| **Smart** | App-aware cleanup | Auto styles for terminal, chat, docs, email, and code |
+| **Personal** | Dictionary + snippets | Teach Undertone your words and trigger reusable expansions |
 | **Free** | No credit card | Groq's free tier is generous |
 | **Offline** | Local fallback | Works without internet via faster-whisper |
 | **Private** | Privacy mode | Keep voice 100% on your machine |
@@ -104,6 +105,8 @@ Run `undertone` to open the interactive CLI:
 | `/status` | Check the vibe |
 | `/logs` | View receipts |
 | `/config` | Tweak settings |
+| `/dictionary` | Add custom spoken -> written replacements |
+| `/snippets` | Manage voice-triggered text expansions |
 | `/help` | Get backup |
 | `/quit` | Peace out |
 
@@ -141,13 +144,25 @@ Undertone auto-detects your display server and uses the right tools.
 
 Undertone uses a two-stage cleanup pipeline:
 
-1. **Regex filler removal** -- instantly strips "um", "uh", "like", "you know", etc.
-2. **LLM grammar fix** -- sends text to Groq's llama-3.1-8b-instant for grammar, punctuation, and capitalization fixes (~160ms extra latency)
+1. **Light filler cleanup** -- instantly strips obvious hesitation fillers like "um" and "uh"
+2. **LLM polish** -- sends text to Groq's llama-3.1-8b-instant for punctuation and typo cleanup while preserving slang, tone, and casual wording (~160ms extra latency)
 
 Toggle LLM cleanup on/off:
 ```
 undertone> /config
 # Select "LLM grammar fix on/off"
+```
+
+Adjust dictation style:
+```
+undertone> /config
+# Select "Dictation style"
+```
+
+Teach Undertone your words or add snippets:
+```
+undertone> /dictionary
+undertone> /snippets
 ```
 
 When LLM is off or fails, regex cleanup runs as fallback.

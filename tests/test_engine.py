@@ -73,10 +73,17 @@ class TestUndertoneEngine:
         assert engine._transcribing is False
 
     @patch("undertone.engine.inject_text")
+    @patch("undertone.engine.save_last_dictation")
+    @patch(
+        "undertone.engine.get_focused_app_context",
+        return_value={"category": "chat", "signature": "discord"},
+    )
     @patch("undertone.engine.route_transcription")
     def test_transcribe_and_type(
         self,
         mock_route: MagicMock,
+        mock_save_last: MagicMock,
+        mock_context: MagicMock,
         mock_inject: MagicMock,
         mock_config: dict,
     ) -> None:
@@ -89,14 +96,26 @@ class TestUndertoneEngine:
         audio_buf = MagicMock()
         engine._transcribe_and_type(audio_buf)
 
-        engine.cleaner.clean.assert_called_once_with("hello world")
+        engine.cleaner.clean.assert_called_once_with(
+            "hello world",
+            style="casual",
+            app_context="chat",
+        )
+        mock_save_last.assert_called_once()
         mock_inject.assert_called_once()
 
     @patch("undertone.engine.inject_text")
+    @patch("undertone.engine.save_last_dictation")
+    @patch(
+        "undertone.engine.get_focused_app_context",
+        return_value={"category": "generic", "signature": ""},
+    )
     @patch("undertone.engine.route_transcription")
     def test_transcribe_and_type_handles_error(
         self,
         mock_route: MagicMock,
+        mock_save_last: MagicMock,
+        mock_context: MagicMock,
         mock_inject: MagicMock,
         mock_config: dict,
     ) -> None:
@@ -110,6 +129,35 @@ class TestUndertoneEngine:
 
         assert engine._transcribing is False
         mock_inject.assert_not_called()
+
+    @patch("undertone.engine.inject_text")
+    @patch("undertone.engine.save_last_dictation")
+    @patch(
+        "undertone.engine.get_focused_app_context",
+        return_value={"category": "generic", "signature": ""},
+    )
+    @patch("undertone.engine.route_transcription")
+    def test_transcribe_and_type_expands_snippet(
+        self,
+        mock_route: MagicMock,
+        mock_context: MagicMock,
+        mock_save_last: MagicMock,
+        mock_inject: MagicMock,
+        mock_config: dict,
+    ) -> None:
+        mock_route.return_value = ("my email", "groq")
+        mock_config["snippets"]["items"] = {"my email": "me@example.com"}
+
+        engine = self._make_engine(mock_config)
+        engine.cleaner = MagicMock()
+
+        audio_buf = MagicMock()
+        engine._transcribe_and_type(audio_buf)
+
+        engine.cleaner.clean.assert_not_called()
+        mock_save_last.assert_called_once()
+        mock_inject.assert_called_once()
+        assert mock_inject.call_args.args[0] == "me@example.com"
 
     def test_shutdown(self, mock_config: dict) -> None:
         engine = self._make_engine(mock_config)

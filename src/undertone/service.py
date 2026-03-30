@@ -9,6 +9,8 @@ from undertone.config import ENV_FILE
 
 SYSTEMD_USER_DIR = Path.home() / ".config" / "systemd" / "user"
 SERVICE_FILE = SYSTEMD_USER_DIR / "undertone.service"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_SRC = PROJECT_ROOT / "src"
 
 SERVICE_TEMPLATE = """[Unit]
 Description=Undertone - Voice Typing for Linux
@@ -17,6 +19,8 @@ PartOf=graphical-session.target
 
 [Service]
 Type=simple
+WorkingDirectory={project_root}
+Environment=PYTHONPATH={project_src}
 ExecStart={python_path} -m undertone.runner
 Restart=on-failure
 RestartSec=5
@@ -39,6 +43,8 @@ def install_service() -> bool:
 
         service_content = SERVICE_TEMPLATE.format(
             python_path=get_python_path(),
+            project_root=PROJECT_ROOT,
+            project_src=PROJECT_SRC,
             env_file=ENV_FILE,
         )
 
@@ -88,6 +94,9 @@ def uninstall_service() -> bool:
 def start_service() -> bool:
     """Start the undertone service."""
     try:
+        if not install_service():
+            return False
+
         result = subprocess.run(
             ["systemctl", "--user", "start", "undertone.service"],
             capture_output=True,
@@ -114,6 +123,9 @@ def stop_service() -> bool:
 def restart_service() -> bool:
     """Restart the undertone service."""
     try:
+        if not install_service():
+            return False
+
         result = subprocess.run(
             ["systemctl", "--user", "restart", "undertone.service"],
             capture_output=True,
