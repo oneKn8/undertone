@@ -73,7 +73,16 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM"]
 ignore = ["E501"]
 
 [tool.mypy]
-python_version = "3.10"
+# No python_version pin: mypy follows the interpreter it runs under.
+#
+# Pinning it to our floor (3.10) also applies 3.10 syntax rules when parsing
+# third-party stubs, and those stubs belong to whichever interpreter is in
+# use. numpy 2.5 raised its own floor to 3.12 and rewrote numpy/__init__.pyi
+# with PEP 695 `type` aliases, so on the 3.12 interpreter the type-check job
+# installs, the resolver picks numpy 2.5 and mypy rejects its stubs as "only
+# supported in Python 3.12 and greater" before checking any of our code.
+# ruff's target-version and the 3.10 leg of the test matrix are what keep us
+# honest about the 3.10 floor.
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
